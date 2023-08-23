@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:36:04 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/18 12:47:45 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/21 19:06:23 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@
 
 typedef struct s_buffer_list
 {
-	char					*buffer;
+	char					buffer[BUFFER_SIZE];
 	char					*start;
 	char					*end;
 	struct s_buffer_list	*next;
@@ -33,10 +33,9 @@ typedef struct s_buffer_list
 
 char			*get_next_line(int fd);
 
-t_buffer_list	*buffer_list_new(void);
-
 char			*find_new_line(char *start_str, char *end_str);
 
-char	*generate_result(t_buffer_list **buffer_list_ptr, char *newline_ptr);
+char			*generate_result(t_buffer_list **buffer_list_ptr,
+					char *newline_ptr);
 
 #endif

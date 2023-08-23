@@ -6,26 +6,24 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/18 12:50:50 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/21 19:22:53 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-t_buffer_list	*buffer_list_new(void)
+void	*ft_calloc(size_t count, size_t size)
 {
-	t_buffer_list	*res;
+	size_t	i;
+	char	*res;
 
-	res = (t_buffer_list *) malloc(sizeof(t_buffer_list));
+	i = count * size;
+	res = (char *) malloc(i);
 	if (res == NULL)
 		return (NULL);
-	res->buffer = (char *) malloc(BUFFER_SIZE);
-	if (res->buffer == NULL)
-		return (NULL);
-	res->start = NULL;
-	res->end = NULL;
-	res->next = NULL;
-	return (res);
+	while (i > 0)
+		res[--i] = 0;
+	return ((void *) res);
 }
 
 //TODO: explain
