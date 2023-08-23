@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:40:30 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/21 19:26:28 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/23 16:39:53 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ char	*get_next_line(int fd)
 	curr_buff_node = buffer_list;
 	while (true)
 	{
-		fill_buffer(curr_buff_node);
+		fill_buffer(fd, curr_buff_node);
 		newline_ptr = find_new_line(curr_buff_node);
 		if (newline_ptr == NULL)
 

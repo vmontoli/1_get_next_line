@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/21 19:22:53 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/23 16:40:36 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,16 @@ void	*ft_calloc(size_t count, size_t size)
 	while (i > 0)
 		res[--i] = 0;
 	return ((void *) res);
+}
+
+void	fill_buffer(int fd, t_buffer_list buff_node)
+{
+	ssize_t bytes_read;
+
+	if (buff_node->start != NULL)
+		return ;
+	bytes_read = read(fd, buff_node->buffer, BUFFER_SIZE);
+	
 }
 
 //TODO: explain
