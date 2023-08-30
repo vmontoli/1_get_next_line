@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:36:04 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/21 19:06:23 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/30 08:42:53 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,19 +23,28 @@
 # include <stdlib.h>		//malloc(), free()
 # include <unistd.h>		//read()
 
-typedef struct s_buffer_list
+typedef struct s_buffer_node
 {
 	char					buffer[BUFFER_SIZE];
 	char					*start;
-	char					*end;
-	struct s_buffer_list	*next;
-}	t_buffer_list;
+	ssize_t					size;
+	struct s_buffer_node	*next;
+}	t_buffer_node;
 
+/***/
 char			*get_next_line(int fd);
+/***/
 
-char			*find_new_line(char *start_str, char *end_str);
+/**/
 
-char			*generate_result(t_buffer_list **buffer_list_ptr,
-					char *newline_ptr);
+t_buffer_node	*new_buffer_node(int fd);
+
+ssize_t			find_newline_pos(t_buffer_node *buff_node);
+
+void			*free_buffer_list(t_buffer_node **buffer_list_ptr,
+					bool maintain_last);
+
+char			*generate_result(t_buffer_node **buffer_list_ptr,
+					ssize_t newline_pos);
 
 #endif
