@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:36:04 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/30 08:42:53 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/31 04:23:18 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,10 @@ ssize_t			find_newline_pos(t_buffer_node *buff_node);
 void			*free_buffer_list(t_buffer_node **buffer_list_ptr,
 					bool maintain_last);
 
-char			*generate_result(t_buffer_node **buffer_list_ptr,
+char			*generate_empty_result(t_buffer_node *buffer_list,
 					ssize_t newline_pos);
+
+void			fill_result_tidy_buff_list(char *result,
+					t_buffer_node **buffer_list_ptr, ssize_t newline_pos);
 
 #endif
