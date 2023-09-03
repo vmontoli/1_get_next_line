@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:40:30 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/03 21:25:24 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/04 00:17:55 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,10 @@ char	*get_next_line(int fd)
 		set_newline_pos(curr_buff_node);
 		if (curr_buff_node->has_newline || curr_buff_node->has_eof)
 		{
-			result = generate_empty_result(buffer_list);
+			result = generate_result(buffer_list);
 			if (result == NULL)
 				return (free_buffer_list(&buffer_list, false));
-			fill_result_tidy_buff_list(result, &buffer_list);
+			tidy_buff_list(&buffer_list);
 			return (result);
 		}
 		curr_buff_node->next = new_buffer_node(fd);
