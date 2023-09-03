@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/31 04:33:37 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/08/31 04:41:25 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,11 +110,18 @@ void	fill_result_tidy_buff_list(char *result,
 	}
 	i = 0;
 	if (newline_pos == -1)
+	{
 		while (i < curr_buff_node->size)
 			*(curr_result++) = curr_buff_node->start[i++];
+		free_buffer_list(buffer_list_ptr, false);
+	}
 	else
+	{
 		while (i <= newline_pos)
 			*(curr_result++) = curr_buff_node->start[i++];
+		curr_buff_node->start += newline_pos + 1;
+		curr_buff_node->size -= newline_pos + 1;
+		free_buffer_list(buffer_list_ptr, true);
+	}
 	*curr_result = '\0';
-	free_buffer_list(buffer_list_ptr, true);
 }
