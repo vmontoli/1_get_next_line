@@ -6,7 +6,7 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:36:04 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/31 04:23:18 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/03 21:26:41 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,10 @@ typedef struct s_buffer_node
 {
 	char					buffer[BUFFER_SIZE];
 	char					*start;
-	ssize_t					size;
+	bool					has_eof;
+	size_t					size;
+	bool					has_newline;
+	size_t					newline_pos;
 	struct s_buffer_node	*next;
 }	t_buffer_node;
 
@@ -39,15 +42,16 @@ char			*get_next_line(int fd);
 
 t_buffer_node	*new_buffer_node(int fd);
 
-ssize_t			find_newline_pos(t_buffer_node *buff_node);
+void			set_newline_pos(t_buffer_node *buff_node);
 
-void			*free_buffer_list(t_buffer_node **buffer_list_ptr,
+t_buffer_node	*free_buffer_list(t_buffer_node **buffer_list_ptr,
 					bool maintain_last);
 
-char			*generate_empty_result(t_buffer_node *buffer_list,
-					ssize_t newline_pos);
+void			tidy_buff_list(t_buffer_node **buffer_list_ptr)
+
+char			*generate_empty_result(t_buffer_node *buffer_list);
 
 void			fill_result_tidy_buff_list(char *result,
-					t_buffer_node **buffer_list_ptr, ssize_t newline_pos);
+					t_buffer_node **buffer_list_ptr);
 
 #endif

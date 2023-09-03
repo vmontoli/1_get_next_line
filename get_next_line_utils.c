@@ -6,47 +6,34 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/08/31 04:41:25 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/03 21:27:10 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-t_buffer_node	*new_buffer_node(int fd)
+/*DONE*/
+void	set_newline_pos(t_buffer_node *buff_node)
 {
-	t_buffer_node	*buff_node;
-	ssize_t			bytes_read;
-
-	buff_node = malloc(sizeof(t_buffer_node));
-	if (buff_node == NULL)
-		return (NULL);
-	bytes_read = read(fd, buff_node->buffer, BUFFER_SIZE);
-	if (bytes_read == -1)
-	{
-		free(buff_node);
-		return (NULL);
-	}
-	buff_node->start = buff_node->buffer;
-	buff_node->size = bytes_read;
-	buff_node->next = NULL;
-	return (buff_node);
-}
-
-ssize_t	find_newline_pos(t_buffer_node *buff_node)
-{
-	ssize_t	i;
+	size_t	i;
 
 	i = 0;
+	buff_node->has_newline = false;
 	while (i < buff_node->size)
 	{
 		if (buff_node->start[i] == '\n')
-			return (i);
+		{
+			buff_node->has_newline = true;
+			buff_node->newline_pos = i;
+			break ;
+		}
 		i++;
 	}
-	return (-1);
 }
 
-void	*free_buffer_list(t_buffer_node **buffer_list_ptr, bool maintain_last)
+/*DONE*/
+t_buffer_node	*free_buffer_list(t_buffer_node **buffer_list_ptr,
+					bool maintain_last)
 {
 	t_buffer_node	*aux_curr;
 	t_buffer_node	*aux_next;
@@ -54,6 +41,8 @@ void	*free_buffer_list(t_buffer_node **buffer_list_ptr, bool maintain_last)
 	if (buffer_list_ptr == NULL)
 		return (NULL);
 	aux_curr = *buffer_list_ptr;
+	if (aux_curr == NULL)
+		return (NULL);
 	aux_next = aux_curr->next;
 	while (aux_next != NULL)
 	{
@@ -68,11 +57,10 @@ void	*free_buffer_list(t_buffer_node **buffer_list_ptr, bool maintain_last)
 		free(aux_curr);
 		*buffer_list_ptr = NULL;
 	}
-	return (NULL);
+	return (*buffer_list_ptr);
 }
 
-char	*generate_empty_result(t_buffer_node *buffer_list,
-			ssize_t newline_pos)
+char	*generate_empty_result(t_buffer_node *buffer_list)
 {
 	ssize_t			size;
 	t_buffer_node	*curr_buff_node;
@@ -84,15 +72,15 @@ char	*generate_empty_result(t_buffer_node *buffer_list,
 		size += curr_buff_node->size;
 		curr_buff_node = curr_buff_node->next;
 	}
-	if (newline_pos == -1)
+	if (curr_buff_node->newline_pos == -1)
 		size += curr_buff_node->size;
 	else
-		size += newline_pos + 1;
+		size += curr_buff_node->newline_pos + 1;
 	return (malloc(size));
 }
 
 void	fill_result_tidy_buff_list(char *result,
-			t_buffer_node **buffer_list_ptr, ssize_t newline_pos)
+			t_buffer_node **buffer_list_ptr)
 {
 	t_buffer_node	*curr_buff_node;
 	char			*curr_result;
@@ -109,7 +97,7 @@ void	fill_result_tidy_buff_list(char *result,
 		curr_buff_node = curr_buff_node->next;
 	}
 	i = 0;
-	if (newline_pos == -1)
+	if (curr_buff_node->newline_pos == -1)
 	{
 		while (i < curr_buff_node->size)
 			*(curr_result++) = curr_buff_node->start[i++];
@@ -117,10 +105,10 @@ void	fill_result_tidy_buff_list(char *result,
 	}
 	else
 	{
-		while (i <= newline_pos)
+		while (i <= curr_buff_node->newline_pos)
 			*(curr_result++) = curr_buff_node->start[i++];
-		curr_buff_node->start += newline_pos + 1;
-		curr_buff_node->size -= newline_pos + 1;
+		curr_buff_node->start += curr_buff_node->newline_pos + 1;
+		curr_buff_node->size -= curr_buff_node->newline_pos + 1;
 		free_buffer_list(buffer_list_ptr, true);
 	}
 	*curr_result = '\0';
