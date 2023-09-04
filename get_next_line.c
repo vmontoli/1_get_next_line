@@ -6,12 +6,13 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:40:30 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/04 00:17:55 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/04 23:46:39 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+//	if (fd < 0 || BUFFER_SIZE <=0 || 
 char	*get_next_line(int fd)
 {
 	static t_buffer_node	*buffer_list = NULL;
@@ -47,6 +48,7 @@ t_buffer_node	*new_buffer_node(int fd)
 	if (buff_node == NULL)
 		return (NULL);
 	bytes_read = read(fd, buff_node->buffer, BUFFER_SIZE);
+	//TODO: bytes_read 0 tiene que mantenerse para marcar EOF (al anterior?)
 	if (bytes_read == -1 || bytes_read == 0)
 	{
 		free(buff_node);
@@ -72,6 +74,52 @@ void	tidy_buff_list(t_buffer_node **buffer_list_ptr)
 	else
 	{
 		free(*buffer_list_ptr);
-		*buffer_list_ptr == NULL;
+		*buffer_list_ptr = NULL;
 	}
+}
+
+void	set_newline_pos(t_buffer_node *buff_node)
+{
+	size_t	i;
+
+	i = 0;
+	buff_node->has_newline = false;
+	while (i < buff_node->size)
+	{
+		if (buff_node->start[i] == '\n')
+		{
+			buff_node->has_newline = true;
+			buff_node->newline_pos = i;
+			break ;
+		}
+		i++;
+	}
+}
+
+void	*free_buffer_list(t_buffer_node **buffer_list_ptr,
+					bool maintain_last)
+{
+	t_buffer_node	*aux_curr;
+	t_buffer_node	*aux_next;
+
+	if (buffer_list_ptr == NULL)
+		return (NULL);
+	aux_curr = *buffer_list_ptr;
+	if (aux_curr == NULL)
+		return (NULL);
+	aux_next = aux_curr->next;
+	while (aux_next != NULL)
+	{
+		free(aux_curr);
+		aux_curr = aux_next;
+		aux_next = aux_curr->next;
+	}
+	if (maintain_last)
+		*buffer_list_ptr = aux_curr;
+	else
+	{
+		free(aux_curr);
+		*buffer_list_ptr = NULL;
+	}
+	return (*buffer_list_ptr);
 }

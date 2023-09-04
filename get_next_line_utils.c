@@ -6,60 +6,42 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/03 21:27:10 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/04 23:32:44 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*DONE*/
-void	set_newline_pos(t_buffer_node *buff_node)
+char	*generate_result(t_buffer_node *buffer_list)
 {
-	size_t	i;
+	size_t			i;
+	t_buffer_node	*curr_buff_node;
+	char			*result;
+	char			*curr_result;
 
-	i = 0;
-	buff_node->has_newline = false;
-	while (i < buff_node->size)
+	i = 1;
+	curr_buff_node = buffer_list;
+	while (curr_buff_node != NULL)
 	{
-		if (buff_node->start[i] == '\n')
-		{
-			buff_node->has_newline = true;
-			buff_node->newline_pos = i;
-			break ;
-		}
-		i++;
+		i += copy_buff_node_to_str(curr_buff_node, NULL);
+		curr_buff_node = curr_buff_node->next;
 	}
+	result = (char *) malloc(i * sizeof(char));
+	if (result == NULL)
+		return (NULL);
+	curr_result = result;
+	curr_buff_node = buffer_list;
+	while (curr_buff_node != NULL)
+	{
+		i = copy_buff_node_to_str(curr_buff_node, curr_result);
+		curr_result += i;
+		curr_buff_node = curr_buff_node->next;
+	}
+	*curr_result = '\0';
+	return (result);
 }
 
-/*DONE*/
-t_buffer_node	*free_buffer_list(t_buffer_node **buffer_list_ptr,
-					bool maintain_last)
-{
-	t_buffer_node	*aux_curr;
-	t_buffer_node	*aux_next;
-
-	if (buffer_list_ptr == NULL)
-		return (NULL);
-	aux_curr = *buffer_list_ptr;
-	if (aux_curr == NULL)
-		return (NULL);
-	aux_next = aux_curr->next;
-	while (aux_next != NULL)
-	{
-		free(aux_curr);
-		aux_curr = aux_next;
-		aux_next = aux_curr->next;
-	}
-	if (maintain_last)
-		*buffer_list_ptr = aux_curr;
-	else
-	{
-		free(aux_curr);
-		*buffer_list_ptr = NULL;
-	}
-	return (*buffer_list_ptr);
-}
-
+/*
 char	*generate_empty_result(t_buffer_node *buffer_list)
 {
 	ssize_t			size;
@@ -112,4 +94,31 @@ void	fill_result_tidy_buff_list(char *result,
 		free_buffer_list(buffer_list_ptr, true);
 	}
 	*curr_result = '\0';
+}
+
+char	*generate_result(t_buffer_node *buffer_list)
+{
+
+}
+*/
+
+size_t	copy_buff_node_to_str(t_buffer_node *curr_buff_node, char *str)
+{
+	size_t	i;
+	size_t	len_to_copy;
+
+	if (curr_buff_node->has_newline)
+		len_to_copy = curr_buff_node->newline_pos + 1;
+	else
+		len_to_copy = curr_buff_node->size;
+	if (str != NULL)
+	{
+		i = 0;
+		while (i < len_to_copy)
+		{
+			str[i] = curr_buff_node->start[i];
+			i++;
+		}
+	}
+	return (len_to_copy);
 }

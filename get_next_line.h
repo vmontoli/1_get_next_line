@@ -6,12 +6,16 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:36:04 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/03 21:26:41 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/04 23:43:41 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
+
+# if ~(~BUFFER_SIZE + 0) == 0 && ~(~BUFFER_SIZE + 1) == 1
+#  undef BUFFER_SIZE
+# endif
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 100
@@ -44,14 +48,20 @@ t_buffer_node	*new_buffer_node(int fd);
 
 void			set_newline_pos(t_buffer_node *buff_node);
 
-t_buffer_node	*free_buffer_list(t_buffer_node **buffer_list_ptr,
+void			*free_buffer_list(t_buffer_node **buffer_list_ptr,
 					bool maintain_last);
 
-void			tidy_buff_list(t_buffer_node **buffer_list_ptr)
+void			tidy_buff_list(t_buffer_node **buffer_list_ptr);
 
+size_t			copy_buff_node_to_str(t_buffer_node *curr_buff_node, char *str);
+
+char			*generate_result(t_buffer_node *buffer_list);
+
+/*
 char			*generate_empty_result(t_buffer_node *buffer_list);
 
 void			fill_result_tidy_buff_list(char *result,
 					t_buffer_node **buffer_list_ptr);
+*/
 
 #endif
