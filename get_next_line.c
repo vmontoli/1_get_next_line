@@ -6,21 +6,22 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:40:30 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/04 23:46:39 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/09 06:06:14 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-//	if (fd < 0 || BUFFER_SIZE <=0 || 
 char	*get_next_line(int fd)
 {
 	static t_buffer_node	*buffer_list = NULL;
 	t_buffer_node			*curr_buff_node;
 	char					*result;
 
+	if (fd < 0 || read(fd, NULL, 0) == -1)
+		return (free_buffer_list(&buffer_list, false));
 	if (buffer_list == NULL)
-		buffer_list = new_buffer_node(fd);
+		new_buffer_node(fd, &buffer_list);
 	curr_buff_node = buffer_list;
 	while (curr_buff_node != NULL)
 	{
@@ -33,49 +34,9 @@ char	*get_next_line(int fd)
 			tidy_buff_list(&buffer_list);
 			return (result);
 		}
-		curr_buff_node->next = new_buffer_node(fd);
-		curr_buff_node = curr_buff_node->next;
+		new_buffer_node(fd, &curr_buff_node);
 	}
 	return (free_buffer_list(&buffer_list, false));
-}
-
-t_buffer_node	*new_buffer_node(int fd)
-{
-	t_buffer_node	*buff_node;
-	ssize_t			bytes_read;
-
-	buff_node = malloc(sizeof(t_buffer_node));
-	if (buff_node == NULL)
-		return (NULL);
-	bytes_read = read(fd, buff_node->buffer, BUFFER_SIZE);
-	//TODO: bytes_read 0 tiene que mantenerse para marcar EOF (al anterior?)
-	if (bytes_read == -1 || bytes_read == 0)
-	{
-		free(buff_node);
-		return (NULL);
-	}
-	buff_node->start = buff_node->buffer;
-	buff_node->has_eof = bytes_read < BUFFER_SIZE;
-	buff_node->size = (size_t) bytes_read;
-	buff_node->has_newline = false;
-	buff_node->next = NULL;
-	return (buff_node);
-}
-
-void	tidy_buff_list(t_buffer_node **buffer_list_ptr)
-{
-	free_buffer_list(buffer_list_ptr, true);
-	if ((*buffer_list_ptr)->has_newline
-		&& ((*buffer_list_ptr)->size > (*buffer_list_ptr)->newline_pos + 1))
-	{
-		(*buffer_list_ptr)->start += (*buffer_list_ptr)->newline_pos + 1;
-		(*buffer_list_ptr)->size -= (*buffer_list_ptr)->newline_pos + 1;
-	}
-	else
-	{
-		free(*buffer_list_ptr);
-		*buffer_list_ptr = NULL;
-	}
 }
 
 void	set_newline_pos(t_buffer_node *buff_node)
@@ -96,30 +57,47 @@ void	set_newline_pos(t_buffer_node *buff_node)
 	}
 }
 
-void	*free_buffer_list(t_buffer_node **buffer_list_ptr,
-					bool maintain_last)
+void	tidy_buff_list(t_buffer_node **buffer_list_ptr)
 {
-	t_buffer_node	*aux_curr;
-	t_buffer_node	*aux_next;
-
-	if (buffer_list_ptr == NULL)
-		return (NULL);
-	aux_curr = *buffer_list_ptr;
-	if (aux_curr == NULL)
-		return (NULL);
-	aux_next = aux_curr->next;
-	while (aux_next != NULL)
+	free_buffer_list(buffer_list_ptr, true);
+	if ((*buffer_list_ptr)->has_newline
+		&& ((*buffer_list_ptr)->size > (*buffer_list_ptr)->newline_pos + 1))
 	{
-		free(aux_curr);
-		aux_curr = aux_next;
-		aux_next = aux_curr->next;
+		(*buffer_list_ptr)->start += (*buffer_list_ptr)->newline_pos + 1;
+		(*buffer_list_ptr)->size -= (*buffer_list_ptr)->newline_pos + 1;
 	}
-	if (maintain_last)
-		*buffer_list_ptr = aux_curr;
 	else
 	{
-		free(aux_curr);
+		free(*buffer_list_ptr);
 		*buffer_list_ptr = NULL;
 	}
-	return (*buffer_list_ptr);
+}
+
+char	*generate_result(t_buffer_node *buffer_list)
+{
+	size_t			i;
+	t_buffer_node	*curr_buff_node;
+	char			*result;
+	char			*curr_result;
+
+	i = 1;
+	curr_buff_node = buffer_list;
+	while (curr_buff_node != NULL)
+	{
+		i += copy_buff_node_to_str(curr_buff_node, NULL);
+		curr_buff_node = curr_buff_node->next;
+	}
+	result = (char *) malloc(i * sizeof(char));
+	if (result == NULL)
+		return (NULL);
+	curr_result = result;
+	curr_buff_node = buffer_list;
+	while (curr_buff_node != NULL)
+	{
+		i = copy_buff_node_to_str(curr_buff_node, curr_result);
+		curr_result += i;
+		curr_buff_node = curr_buff_node->next;
+	}
+	*curr_result = '\0';
+	return (result);
 }

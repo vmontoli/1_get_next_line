@@ -6,101 +6,66 @@
 /*   By: vmontoli <vmontoli@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 09:44:42 by vmontoli          #+#    #+#             */
-/*   Updated: 2023/09/04 23:32:44 by vmontoli         ###   ########.fr       */
+/*   Updated: 2023/09/09 06:06:17 by vmontoli         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*generate_result(t_buffer_node *buffer_list)
+void	new_buffer_node(int fd, t_buffer_node **prev_ptr)
 {
-	size_t			i;
-	t_buffer_node	*curr_buff_node;
-	char			*result;
-	char			*curr_result;
+	t_buffer_node	*buff_node;
+	ssize_t			bytes_read;
 
-	i = 1;
-	curr_buff_node = buffer_list;
-	while (curr_buff_node != NULL)
+	buff_node = malloc(sizeof(t_buffer_node));
+	if (buff_node == NULL)
+		return ;
+	bytes_read = read(fd, buff_node->buffer, BUFFER_SIZE);
+	if (bytes_read == -1 || bytes_read == 0)
 	{
-		i += copy_buff_node_to_str(curr_buff_node, NULL);
-		curr_buff_node = curr_buff_node->next;
+		if (bytes_read == 0 && *prev_ptr != NULL)
+			(*prev_ptr)->has_eof = true;
+		else
+			*prev_ptr = NULL;
+		free(buff_node);
+		return ;
 	}
-	result = (char *) malloc(i * sizeof(char));
-	if (result == NULL)
+	if (*prev_ptr != NULL)
+		(*prev_ptr)->next = buff_node;
+	buff_node->start = buff_node->buffer;
+	buff_node->has_eof = bytes_read < BUFFER_SIZE;
+	buff_node->size = (size_t) bytes_read;
+	buff_node->next = NULL;
+	*prev_ptr = buff_node;
+}
+
+void	*free_buffer_list(t_buffer_node **buffer_list_ptr,
+					bool maintain_last)
+{
+	t_buffer_node	*aux_curr;
+	t_buffer_node	*aux_next;
+
+	if (buffer_list_ptr == NULL)
 		return (NULL);
-	curr_result = result;
-	curr_buff_node = buffer_list;
-	while (curr_buff_node != NULL)
+	aux_curr = *buffer_list_ptr;
+	if (aux_curr == NULL)
+		return (NULL);
+	aux_next = aux_curr->next;
+	while (aux_next != NULL)
 	{
-		i = copy_buff_node_to_str(curr_buff_node, curr_result);
-		curr_result += i;
-		curr_buff_node = curr_buff_node->next;
+		free(aux_curr);
+		aux_curr = aux_next;
+		aux_next = aux_curr->next;
 	}
-	*curr_result = '\0';
-	return (result);
-}
-
-/*
-char	*generate_empty_result(t_buffer_node *buffer_list)
-{
-	ssize_t			size;
-	t_buffer_node	*curr_buff_node;
-
-	curr_buff_node = buffer_list;
-	size = 1;
-	while (curr_buff_node->next != NULL)
-	{
-		size += curr_buff_node->size;
-		curr_buff_node = curr_buff_node->next;
-	}
-	if (curr_buff_node->newline_pos == -1)
-		size += curr_buff_node->size;
-	else
-		size += curr_buff_node->newline_pos + 1;
-	return (malloc(size));
-}
-
-void	fill_result_tidy_buff_list(char *result,
-			t_buffer_node **buffer_list_ptr)
-{
-	t_buffer_node	*curr_buff_node;
-	char			*curr_result;
-	ssize_t			i;
-
-	curr_buff_node = *buffer_list_ptr;
-	curr_result = result;
-	while (curr_buff_node->next != NULL)
-	{
-		i = 0;
-		while (++i < curr_buff_node->size)
-			curr_result[i] = curr_buff_node->start[i];
-		curr_result += curr_buff_node->size;
-		curr_buff_node = curr_buff_node->next;
-	}
-	i = 0;
-	if (curr_buff_node->newline_pos == -1)
-	{
-		while (i < curr_buff_node->size)
-			*(curr_result++) = curr_buff_node->start[i++];
-		free_buffer_list(buffer_list_ptr, false);
-	}
+	if (maintain_last)
+		*buffer_list_ptr = aux_curr;
 	else
 	{
-		while (i <= curr_buff_node->newline_pos)
-			*(curr_result++) = curr_buff_node->start[i++];
-		curr_buff_node->start += curr_buff_node->newline_pos + 1;
-		curr_buff_node->size -= curr_buff_node->newline_pos + 1;
-		free_buffer_list(buffer_list_ptr, true);
+		free(aux_curr);
+		*buffer_list_ptr = NULL;
 	}
-	*curr_result = '\0';
+	return (*buffer_list_ptr);
 }
-
-char	*generate_result(t_buffer_node *buffer_list)
-{
-
-}
-*/
 
 size_t	copy_buff_node_to_str(t_buffer_node *curr_buff_node, char *str)
 {
